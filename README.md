@@ -1,11 +1,11 @@
-#iptables-formula
+# iptables-formula
 
 This module manages your firewall using iptables with pillar configured rules.
 Thanks to the nature of Pillars it is possible to write global and local settings (e.g. enable globally, configure locally).
 
 By default, you will get locked out of the server, completely. you must specify any services (like ssh) explicitly to allow access.
 
-##Usage
+## Usage
 
 All the configuration for the firewall is done via pillar (pillar.example).
 
@@ -19,7 +19,7 @@ iptables:
     enable: True
 ```
 
-###Services
+### Services
 defaults to `-A INPUT -p tcp --dport <foo> -j ACCEPT` when dport is specified. To reject, specify `jump: REJECT`. You can specify one protocol with `proto` or several protocols in a list using `protos`. Same with `dest/dests` and `source/sources`. `dport` can be a service name if it is a standard port, i.e. ssh, http, https, or a port number.
 ```
 iptables:
@@ -44,7 +44,7 @@ iptables:
         interface: eth0
 ```
 
-###Whitelists
+### Whitelists
 ```
 iptables:
   enabled: True
@@ -55,7 +55,7 @@ iptables:
       - source: 192.168.0.0/16
 ```
 
-###NAT
+### NAT
 ```
 iptables:
   enabled: True
@@ -108,7 +108,7 @@ iptables:
       - source: my-v6set-name
         jump: ACCEPT
 
-###Disable ICMP v4 Echo Requests
+### Disable ICMP v4 Echo Requests
 There may be a desire to disable icmp echo requests (ping) to prevent scanning of sensitve systems. The pillar value `icmp_v4_echo_request: disable` will prevent echo requests. The default value will allow pings. **This only effects ipv4** ipv6 rules are not effected.
 ```
 iptables:
