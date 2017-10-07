@@ -71,13 +71,13 @@ iptables:
           - 10.0.0.0/8
 ```
 
-### IPSet Support ###
+### IPSet Support
 
 Groups of IP addresses may be maintained as an ipset instead of as a series of individual rules for ease of management. IPSets may be specified as lists of address values.
 
 Once a set is declared, the set name may be used in place of a "source" or "dest" value when specifying firewall rules.
 
-#### IPSets from lists ####
+#### IPSets from lists
 
 ```
 iptables:
