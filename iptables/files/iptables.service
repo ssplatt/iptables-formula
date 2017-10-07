@@ -1,0 +1,12 @@
+[Unit]
+Description=iptables 
+After=syslog.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/iptables-start.sh
+ExecStop=/usr/local/bin/iptables-stop.sh
+RemainAfterExit=True
+
+[Install]
+WantedBy=network.target

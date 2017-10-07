@@ -1,0 +1,6 @@
+{%- for set, attrs in sets.iteritems() -%}
+  {%- set members = attrs.members -%}
+  {% for member in members|sort() -%}
+add {{ set }} {{ member }}
+  {% endfor -%}
+{% endfor -%}

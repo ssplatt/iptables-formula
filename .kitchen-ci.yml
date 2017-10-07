@@ -1,0 +1,29 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+---
+driver:
+  name: linode
+
+provisioner:
+  name: salt_solo
+  formula: iptables
+  state_top:
+    base:
+      "*":
+        - iptables
+
+platforms:
+  - name: debian_jessie
+  
+suites:
+  - name: default
+  
+  - name: custom
+    provisioner:
+      pillars-from-files:
+        iptables.sls: pillar-custom.sls
+      pillars:
+        top.sls:
+          base:
+            "*":
+              - iptables

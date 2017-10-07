@@ -1,0 +1,4 @@
+{%- for set, attrs in sets.iteritems() -%}
+{%- set family = attrs.get('family', 'inet') -%}
+create {{ set }} {{ attrs.type }} family {{ family }} hashsize 1024 maxelem 65536
+{% endfor -%}

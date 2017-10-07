@@ -1,0 +1,127 @@
+{%- from "iptables/map.jinja" import iptables with context -%}
+{%- from "iptables/map.jinja" import ipset with context -%}
+*mangle
+{# Generate rules for Mangle #}
+{%- if iptables.mangle is defined -%}
+  {%- for rule in iptables.nat.rules -%}
+    {# something here #}
+  {%- endfor -%}
+{%- endif %}
+COMMIT
+
+*nat
+{# Generate rules for NAT #}
+{%- if iptables.nat is defined -%}
+  {%- for rule in iptables.nat.rules -%}
+    {{ "-A POSTROUTING -o " ~ rule.oface ~ " -s " ~ rule.source }}
+
+    {%- if rule.dests is defined -%}
+      {{ " -d " ~ rule.dests | join(",") }}
+    {%- elif rule.dest is defined -%}
+      {%- if ipset.enabled and iptset.sets.has_key(rule.dest) -%}
+      {{ " -m set --match-set " ~ rule.dest ~ " dst"}}
+      {%- else -%}
+      {{ " -d " ~ rule.dest }}
+      {%- endif -%}
+    {%- endif -%}
+
+    {{ " -j MASQUERADE\n" }}
+  {%- endfor -%}
+{%- endif %}
+COMMIT
+
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+-A INPUT -i lo -j ACCEPT
+-A INPUT ! -i lo -d ::1/128 -j REJECT
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A OUTPUT -j ACCEPT
+
+{# Generate rules for filter #}
+{%- if iptables.filter is defined -%}
+  {%- if iptables.filter.rules_v6 is defined -%}
+    {%- for rule in iptables.filter.rules_v6 -%}
+      {{ "-A INPUT" }}
+
+      {%- if rule.interface is defined -%}
+        {{ " -i " ~ rule.interface }}
+      {%- endif -%}
+
+      {%- if rule.sources is defined -%}
+        {{ " -s " ~ rule.sources | join(",") }}
+      {%- elif rule.source is defined -%}
+        {%- if ipset.enabled and ipset.sets.has_key(rule.source) -%}
+        {{ " -m set --match-set " ~ rule.source ~ " src"}}
+        {%- else -%}
+        {{ " -s " ~ rule.source }}
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if rule.dests is defined -%}
+        {{ " -d " ~ rule.dests | join(",") }}
+      {%- elif rule.dest is defined -%}
+        {%- if ipset.enabled and ipset.sets.has_key(rule.dest) -%}
+        {{ " -m set --match-set " ~ rule.dest ~ " dst"}}
+        {%- else -%}
+        {{ " -d " ~ rule.dest }}
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if rule.protos is defined -%}
+        {{ " -p " ~ rule.protos | join(",") }}
+      {%- elif rule.proto is defined -%}
+        {{ " -p " ~ rule.proto }}
+      {%- elif rule.dport is defined -%}
+        {{ " -p tcp" }}
+      {%- endif -%}
+
+      {%- if rule.state is defined and rule.match is defined -%}
+        {{ " -m " ~ rule.match ~ " --state " ~ rule.state }}
+      {%- elif rule.state is defined -%}
+        {{ " -m state --state " ~ rule.state }}
+      {%- elif rule.match is defined -%}
+        {{ " -m " ~ rule.match }}
+      {%- elif rule.proto is defined -%}
+        {{ " -m " ~ rule.proto }}
+      {%- elif rule.dport is defined -%}
+        {{ " -m tcp" }}
+      {%- endif -%}
+
+      {%- if rule.limit is defined -%}
+        {{ " --limit " ~ rule.limit }}
+      {%- endif -%}
+
+      {%- if rule.dport is defined -%}
+        {{ " --dport " ~ rule.dport }}
+      {%- endif -%}
+
+      {%- if rule.jump is defined -%}
+        {{ " -j " ~ rule.jump }}
+      {%- else -%}
+        {{ " -j ACCEPT" }}
+      {%- endif -%}
+
+      {%- if rule.log_prefix is defined -%}
+        {{ ' --log-prefix "' ~ rule.log_prefix ~ '"' }}
+      {%- endif -%}
+
+      {%- if rule.log_level is defined -%}
+        {{ " --log-level " ~ rule.log_level }}
+      {%- endif -%}
+
+      {%- if rule.rejectwith is defined -%}
+        {{ " --reject-with " ~ rule.rejectwith }}
+      {%- endif -%}
+
+      {{ "\n" }}
+
+    {%- endfor -%}
+  {%- endif -%}
+{%- endif %}
+-A INPUT -p icmpv6 -j ACCEPT
+-A INPUT -j REJECT
+-A FORWARD -j REJECT
+COMMIT

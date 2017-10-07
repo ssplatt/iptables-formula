@@ -1,0 +1,16 @@
+[Unit]
+Description=Loading kernel space IP sets
+Before=network-pre.target iptables.service
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/ipset -f /usr/local/etc/ipset/sets.conf restore
+ExecStart=/sbin/ipset -f /usr/local/etc/ipset/members.conf restore
+ExecReload=/sbin/ipset flush
+ExecReload=/sbin/ipset -f /usr/local/etc/ipset/members.conf restore
+ExecStop=/sbin/ipset destroy
+
+[Install]
+WantedBy=multi-user.target

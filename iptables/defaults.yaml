@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+---
+iptables:
+  enabled: False
+  required_pkgs:
+    - iptables
+    - iptables-persistent
+  service:
+    name: iptables
+    state: dead
+    enable: False
+  icmp_v4_echo_request: enable
+  # filter:
+  #   enabled: False
+  # nat:
+  #   enabled: False
+  # mangle:
+  #   enabled: False
+ipset:
+  enabled: false
+  pkg: ipset
+  service:
+    name: ipset
+    state: disabled
+    enable: false
+  sets: {}
